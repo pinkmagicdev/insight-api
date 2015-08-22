@@ -7,6 +7,7 @@
 var _ = require('lodash');
 var Address = require('../models/Address');
 var common = require('./common');
+var multi = common.multi;
 var async = require('async');
 
 var MAX_BATCH_SIZE = 100;
@@ -79,7 +80,38 @@ exports.show = function(req, res, next) {
   }
 };
 
+/**
+ * Find more addresses ...
+ */
+exports.multiaddr = multi(function(addr, cb) {
 
+  var a;
+  try {
+      a = new Address(addr);
+      if (a) {
+        a.update(function(err) {
+          if (err) {
+            return cb(err);
+          } else {
+            return cb(null, a.getObj());
+          }
+        });
+      }
+  } catch (err) {
+    return cb(err);
+  }
+  
+}, 'multiaddr');
+
+/**
+ * Show more addresses
+ */
+exports.multishow = function(req, res) {
+
+  if (req.multiaddr) {
+    res.jsonp(req.multiaddr);
+  }
+};
 
 exports.utxo = function(req, res, next) {
   if (!checkSync(req, res)) return;
