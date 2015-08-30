@@ -1,7 +1,7 @@
 'use strict';
 
 var async       = require('async');
-
+var MAX_BATCH_SIZE = 100;
 exports.notReady = function (err, res, p) {
   res.status(503).send('Server not yet ready. Sync Percentage:' + p);
 };
@@ -25,6 +25,7 @@ exports.multi = function(f, outkey) {
     var inputs;
     if (inputdata.indexOf(',') >= 0) {
       inputs = inputdata.split(',');
+      inputs = inputs.slice(0, MAX_BATCH_SIZE + 1)
     }
     else inputs = [inputdata];
     async.mapSeries(inputs, f, function(err, results) {
